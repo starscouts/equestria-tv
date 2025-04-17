@@ -1,0 +1,71 @@
+@font-face {
+    src: url("./font/font-bold.ttf");
+    font-family: "TVApp";
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    src: url("./font/font-bolditalic.ttf");
+    font-family: "TVApp";
+    font-weight: bold;
+    font-style: italic;
+}
+
+@font-face {
+    src: url("./font/font-italic.ttf");
+    font-family: "TVApp";
+    font-weight: normal;
+    font-style: italic;
+}
+
+@font-face {
+    src: url("./font/font-regular.ttf");
+    font-family: "TVApp";
+    font-weight: normal;
+    font-style: normal;
+}
+
+* {
+    font-family: "TVApp", "Product Sans", sans-serif;
+    overflow: hidden !important;
+    cursor: none !important;
+}
+
+html, body {
+    margin: 0;
+    background: #252525;
+    color: white;
+    height: 100%;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+}
+
+h1 {
+    font-size: 8em;
+}
+
+h2 {
+    font-size: 6em;
+}
+
+h3 {
+    font-size: 4.68em;
+}
+
+h4 {
+    font-size: 4em;
+    font-weight: normal;
+}
+
+h5 {
+    font-size: 3.32em;
+    font-weight: normal;
+}
+
+h6 {
+    font-size: 2.68em;
+    font-weight: normal;
+}

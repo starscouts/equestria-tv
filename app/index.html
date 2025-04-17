@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script>
+
+        let noisyBoot = false;
+
+    </script>
+    <meta charset="UTF-8">
+    <title>TVApp</title>
+    <link rel="stylesheet" href="./fonts.css">
+    <script src="./qr.js"></script>
+    <style>
+        .loading {
+            animation-name: load;
+            animation-duration: 2s;
+            animation-iteration-count: infinite;
+            animation-timing-function: linear;
+        }
+
+        @keyframes load {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+
+        .hide {
+            opacity: 0;
+            transition: opacity 500ms;
+        }
+
+        .hud-part {
+            opacity: 0;
+            transition: opacity 2000ms;
+            transition-delay: 3000ms;
+        }
+
+        .hud-show {
+            opacity: 1;
+            transition-delay: 0ms;
+            transition: opacity 200ms;
+        }
+
+        #notification {
+            opacity: 1;
+            transition-delay: 0ms;
+            transition: opacity 200ms;
+        }
+
+        #notification.notification-hidden {
+            opacity: 0;
+            transition: opacity 2000ms;
+            transition-delay: 9000ms;
+        }
+    </style>
+</head>
+<body>
+    <div id="clock" class="hud-part hud-show" style="position: fixed; top: 20px; right: 20px; z-index: 99999; padding: 30px; background: rgba(0, 0, 0, .3); backdrop-filter: blur(10px); border-radius: 999px; font-size: 56px; display: none;">
+        12:34
+    </div>
+
+    <div id="notification" class="notification-hidden" style="position: fixed; top: 20px; left: 20px; right: 216px; z-index: 99999; padding: 30px 50px; background: rgba(0, 0, 0, .3); backdrop-filter: blur(10px); border-radius: 999px; font-size: 28px; height: 68px; display: flex; align-items: center;"></div>
+
+    <script>
+        setInterval(() => {
+            let dp = new Date().toTimeString().split(" ")[0].split(":");
+            document.getElementById("clock").innerText = dp[0] + ":" + dp[1];
+        }, 1000);
+    </script>
+
+    <div id="loader" style="position: fixed; inset: 0; background: black; z-index: 999;">
+        <video class="loading" src="./intro.mp4" id="loader-video" style="position: fixed; inset: 0; width: 100%; height: 100%;"></video>
+
+        <script>
+            let loaderVideoInterval = setInterval(() => {
+                if (document.getElementById("loader-video").currentTime > 2.63) {
+                    document.getElementById("loader-video").classList.remove("loading");
+                }
+            });
+        </script>
+    </div>
+
+    <div id="player" style="position: fixed; inset: 0; background: black; z-index: 99; display: none;">
+        <audio id="player-audio"></audio>
+        <video id="player-video" style="position: fixed; inset: 0; width: 100%; height: 100%;"></video>
+    </div>
+
+    <div id="intro" style="display: flex; align-items: center; justify-content: center; padding: 0 100px; position: fixed; inset: 0; background: #252525; z-index: 9;">
+        <div style="display: grid; grid-template-columns: 512px 1fr; width: max-content;">
+            <div style="display: flex; align-items: center;">
+                <div id="qrcode" style="background-color: white; height: 472px; width: 472px; border-radius: 20px; padding: 20px;"></div>
+            </div>
+            <div style="display: flex; align-items: center; margin-left: 50px; width: max-content;">
+                <div>
+                    <h1>Ready to play</h1>
+                    <h5 style="max-width: 40vw;">Use the Equestria TV app on your phone or computer to stream content to this device.</h5>
+                    <h6 style="opacity: .5; margin-top: 10px; max-width: 40vw;">Can't scan the QR code? Use code <span id="connectionCode">-</span> to connect to this device</h6>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            window.localIP = Object.values(require('os').networkInterfaces()).reduce((a, b) => { return [...a, ...b] }).filter((i) => { return i.family === "IPv4" && !i.address.startsWith("127.") })[0].address;
+            window.localIPHex = localIP.split(".").map((i) => { let s = parseInt(i.toString()).toString(16); if (s.length === 1) { return "0" + s; } else { return s; } }).reduce((a, b) => { return a + b; }).toUpperCase();
+            window.connectionCode = Math.floor(Math.random() * (65535 - 27423 + 1) + 27423);
+
+            document.getElementById("connectionCode").innerText = localIPHex + connectionCode;
+
+            window.qrcode = new QRCode(document.getElementById("qrcode"), {
+                text: JSON.stringify({
+                    "address": localIP,
+                    "code": connectionCode
+                }),
+                width: 472,
+                height: 472,
+                correctLevel : QRCode.CorrectLevel.H
+            })
+            document.getElementById("qrcode").title = "";
+        </script>
+    </div>
+
+    <div id="ready" style="align-items: center; justify-content: center; padding: 0 100px; position: fixed; inset: 0; background: #252525; z-index: 30; display: none;">
+        <div style="display: grid; grid-template-columns: 1fr; width: max-content;">
+            <div style="display: flex; align-items: center; margin-left: 50px; width: max-content;">
+                <div>
+                    <h1>Ready to play</h1>
+                    <h5 style="max-width: 40vw;">Use the Equestria TV app on your phone or computer to stream content to this device.</h5>
+                    <h6 style="opacity: .5; margin-top: 10px; max-width: 40vw;">You are already connected to this device, but no content is playing.</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./server.js"></script>
+    <script src="./notification.js"></script>
+    <script src="./methods/play.js"></script>
+    <script src="./methods/toggle.js"></script>
+
+    <script>
+        bootAudio = new Audio("./boot.mp3");
+
+        window.onload = () => {
+            // If you have additional things to load, do it here.
+
+            setTimeout(() => {
+                if (!noisyBoot) document.getElementById("loader-video").muted = true;
+                document.getElementById("loader-video").play();
+
+                setTimeout(() => {
+                    Array.from(document.getElementsByClassName("hud-part")).forEach((i) => {
+                        i.style.display = "";
+                    });
+                    document.getElementById("loader").classList.add("hide");
+                    if (noisyBoot) bootAudio.play();
+                }, noisyBoot ? 7000 : 500);
+            }, noisyBoot ? 5000 : 500);
+        }
+
+        window.onerror = (message) => {
+            notification("An internal system error occurred, system behavior may be affected. " + message)
+        }
+    </script>
+</body>
+</html>
